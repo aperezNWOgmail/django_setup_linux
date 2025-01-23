@@ -1,0 +1,3 @@
+-- [_] https://code.visualstudio.com/docs/python/tutorial-django
+
+      -- [x] Install the Python extension.
