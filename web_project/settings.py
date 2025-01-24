@@ -126,15 +126,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #DATABASES = {
 #    'default': {
-#        'ENGINE': 'django.db.backends.sqlite3',
+#        'ENGINE': 'mssql',
 #        'NAME': 'webapiangulardemo.mssql.somee.com',
 #        'USER': 'aperezNWO_SQLLogin_1',
-#        'PASSWORD': 'aperezNWO_SQLLogin_1',
+##        'PASSWORD': 'aperezNWO_SQLLogin_1',
 #        'HOST': 'webapiangulardemo.mssql.somee.com',
-#        'PORT': '',
-#        'OPTIONS': {
-#            'driver': 'ODBC Driver 17 for SQL Server',
-#        },
+#        'PORT': '1433'
 #        }    
 #}
 
