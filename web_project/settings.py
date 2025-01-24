@@ -124,6 +124,20 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': 'webapiangulardemo.mssql.somee.com',
+#        'USER': 'aperezNWO_SQLLogin_1',
+#        'PASSWORD': 'aperezNWO_SQLLogin_1',
+#        'HOST': 'webapiangulardemo.mssql.somee.com',
+#        'PORT': '',
+#        'OPTIONS': {
+#            'driver': 'ODBC Driver 17 for SQL Server',
+#        },
+#        }    
+#}
+
 CORS_ALLOWED_ORIGINS = [
     "https://apereznwo.github.io",  # Replace with your frontend origin
 ]
