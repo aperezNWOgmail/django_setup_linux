@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-# from hello.models import YourModel
+from hello.models import LogModel
 
 
 def home(request):

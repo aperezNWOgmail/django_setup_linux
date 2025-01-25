@@ -1,3 +1,10 @@
 -- [_] https://code.visualstudio.com/docs/python/tutorial-django
 
       -- [x] Install the Python extension.
+
+# Linux
+sudo apt-get install python3-venv    # If needed
+python3 -m venv .venv
+source .venv/bin/activate
+
+pip install corsheader
