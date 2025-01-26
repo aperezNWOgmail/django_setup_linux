@@ -7,4 +7,15 @@ sudo apt-get install python3-venv    # If needed
 python3 -m venv .venv
 source .venv/bin/activate
 
-pip install corsheader
+python -m pip install --upgrade pip
+
+python -m pip install django
+
+pip install django-cors-headers
+
+pip install mssql-django
+
+pip install django djangorestframework pyodbc
+
+python manage.py migrate
+python manage.py runserver
