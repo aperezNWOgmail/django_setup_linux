@@ -1,16 +1,28 @@
--- [_] https://code.visualstudio.com/docs/python/tutorial-django
 
-      -- [x] Install the Python extension.
+-- [_] https://code.visualstudio.com/docs/python/tutorial-django
 
 # Linux
 sudo apt-get install python3-venv    # If needed
 python3 -m venv .venv
 source .venv/bin/activate
 
+<<<<<<< HEAD
+=======
+# Windows
+py -3 -m venv .venv
+.venv\scripts\activate
+
+In VS Code, open the Command Palette (View > Command Palette or (Ctrl+Shift+P)). 
+Then select the Python: Select Interpreter command:
+
+select the virtual environment in your project folder that starts with ./.venv or .\.venv:
+
+>>>>>>> f5a57c2 (scm update)
 python -m pip install --upgrade pip
 
 python -m pip install django
 
+<<<<<<< HEAD
 pip install django-cors-headers
 
 pip install mssql-django
@@ -19,3 +31,130 @@ pip install django djangorestframework pyodbc
 
 python manage.py migrate
 python manage.py runserver
+=======
+.venv\Scripts\Activate.ps1 
+
+django-admin startproject web_project .
+
+python manage.py migrate
+
+python manage.py runserver
+
+python manage.py startapp hello
+
+-----------------
+Modify hello/views.py to match the following code, which creates a single view for the app's home page:
+
+from django.http import HttpResponse
+
+def home(request):
+    return HttpResponse("Hello, Django!")
+-----------------
+
+Create a file, hello/urls.py
+
+from django.urls import path
+from hello import views
+
+urlpatterns = [
+    path("", views.home, name="home"),
+]
+-----------------
+The web_project folder also contains a urls.py
+
+from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+    path("", include("hello.urls")),
+    path('admin/', admin.site.urls)
+]
+
+-----------------
+
+python manage.py runserver
+
+Switch to Run view in VS Code
+
+launch.json
+
+ "Python: Django":
+
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python Debugger: Django",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}\\manage.py",
+      "args": ["runserver"],
+      "django": true,
+      "justMyCode": true
+    }
+  ]
+}
+
+-----------------
+
+python manage.py migrate
+
+python manage.py runserver
+
+pip install django-cors-headers
+
+pip install django djangorestframework pyodbc
+
+
+.venv\Scripts\Activate.ps1   
+
+-----------------
+
+get current  djanto version
+
+python -m django --version
+
+5.1.5
+
+pip install mssql-django
+pip install pyodbc
+
+python manage.py migrate
+python manage.py runserver
+
+-------------------------
+
+¿How can I expose a resftul endpotint with json format as a result of a raw ms sql server query using django?
+
+pip install django djangorestframework pyodbc
+
+settings.py
+
+INSTALLED_APPS = [
+    # ... other apps
+    'rest_framework',
+]
+
+-------------------------
+
+# Linux
+sudo apt-get install python3-venv    # If needed
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Add Microsoft repository
+curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list > /etc/apt/sources.list.d/mssql-release.list
+
+# Update and install ODBC Driver
+sudo apt-get update
+sudo ACCEPT_EULA=Y apt-get install msodbcsql17
+
+
+python manage.py runserver
+
+-------------------------
+>>>>>>> f5a57c2 (scm update)
