@@ -2,27 +2,26 @@
 -- main setup (not windows compatible)
 -----------------------------------------
 
-sudo apt-get install python3-venv    # If needed
+# 1. Create and activate virtual environment
+sudo apt-get install python3-venv    # Install venv if not available
 python3 -m venv .venv
 source .venv/bin/activate
 
-
-# Add Microsoft repository
+# 2. Add Microsoft repository for SQL Server (optional, for DB connectivity)
 curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-# not working # curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list > /etc/apt/sources.list.d/mssql-release.list
-
-# Update and install ODBC Driver
 sudo apt-get update
+
+# 3. Install ODBC Driver for SQL Server (only if connecting to MS SQL)
 sudo ACCEPT_EULA=Y apt-get install msodbcsql17
 
-pip install django djangorestframework pyodbc
-pip install mssql-django
-pip install django-cors-headers
+# 4. Install Python packages
+pip install django djangorestframework pyodbc mssql-django django-cors-headers
 
-ALLOWED_HOSTS = ['n96q4t-8000.csb.app','localhost', '127.0.0.1']
+# 5. ✅ ADD TENSORFLOW FOR AI MODEL TRAINING
+pip install tensorflow
 
-source .venv/bin/activate (solo si no esta activado)
+# 6. Optional shorcut for both 4. and 5. 
+pip install -r requirements.txt
 
-python manage.py runserver
-
--------------------------
+# 7. 
+______________________________________________________________________________
