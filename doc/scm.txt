@@ -23,5 +23,9 @@ pip install tensorflow
 # 6. Optional shorcut for both 4. and 5. 
 pip install -r requirements.txt
 
-# 7. 
+# 7. Run server 
+python manage.py runserver
+
+# 8. Download Model
+https://x2yzhk-8000.csb.app/
 ______________________________________________________________________________
