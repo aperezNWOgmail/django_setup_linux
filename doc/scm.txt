@@ -18,8 +18,7 @@ sudo ACCEPT_EULA=Y apt-get install msodbcsql17
 pip install django djangorestframework pyodbc mssql-django django-cors-headers
 
 # 5. ✅ ADD TENSORFLOW FOR AI MODEL TRAINING
-pip install tensorflow
-tensorflow              2.20.0
+pip install tensorflow==2.8.0 protobuf==3.20.3 numpy==1.21.6 --no-cache-dir --force-reinstall
 
 # 6. Optional shorcut for both 4. and 5. 
 pip install -r requirements.txt
