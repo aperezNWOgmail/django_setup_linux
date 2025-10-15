@@ -1,14 +1,10 @@
-import zipfile
 from django.http import FileResponse, JsonResponse
-from django.http import FileResponse
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.http import JsonResponse
 from django.db import connection
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import serializers
-from rest_framework.decorators import api_view
 import numpy as np
 import tensorflow as tf
 import os
@@ -74,7 +70,7 @@ def getAllLogs(request):
             cursor.execute(sql)
             rows = cursor.fetchall()
             serializer = RawDataSerializer(rows, many=True, context={
-                                           'cursor': cursor})  # Pass cursor for field names
+                                           'cursor': cursor})   # Pass cursor for field names
             return Response(serializer.data)
     except Exception as e:
         return Response({'error': str(e)}, status=500)
