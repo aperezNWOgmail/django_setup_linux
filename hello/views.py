@@ -5,18 +5,19 @@ from django.db import connection
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import serializers
-import numpy as np
-import tensorflow as tf
 from tensorflow.keras import layers, models
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress warnings
-import shutil
-import tempfile
-import random
 from typing              import Tuple, Dict
 from tetris_env          import TetrisEnv
 from train_agent_tetris  import train_agent_tetris
-
+from django.conf         import settings
+import zipfile
+import shutil
+import tempfile
+import random
+import numpy      as np
+import tensorflow as tf
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress warnings
 
 
 ##############################################333
@@ -67,29 +68,77 @@ def download_tetris_model(request):
         return JsonResponse({"error": "Model not trained yet."}, status=404)
 
     try:
+
         # Create a temporary directory for the zip file
-        temp_dir = tempfile.mkdtemp()
-        zip_path = os.path.join(temp_dir, 'tetris_tf_model.zip')
+        #temp_dir = tempfile.mkdtemp()
+        #zip_path = os.path.join(temp_dir, 'tetris_tf_model.zip')
 
         # Create ZIP archive
-        shutil.make_archive(
+        #shutil.make_archive(
             # output path (no extension)
-            base_name=os.path.join(temp_dir, 'tictactoe_tf_model'),
-            format='zip',
-            root_dir=model_dir  # directory to compress
-        )
+        #    base_name=os.path.join(temp_dir, 'tetris_dqn_model.h5'),
+        #    format='zip',
+        #    root_dir=model_dir  # directory to compress
+        #)
 
         # Serve the file
-        response = FileResponse(
-            open(zip_path, 'rb'),
-            content_type='application/zip'
-        )
-        response['Content-Disposition'] = 'attachment; filename="tictactoe_tf_model.zip"'
-        return response
+        #response = FileResponse(
+        #    open(zip_path, 'rb'),
+        #    content_type='application/zip'
+        #)
+        #response['Content-Disposition'] = 'attachment; filename="tictactoe_tf_model.zip"'
+        #return response
+
+        #format_type = request.GET.get("format", "h5")
+        #format_type = request.GET.get("format", "h5")
+
+        format_type = "zip"
+
+        if format_type == "zip":
+            # Crear un archivo ZIP con ambos
+            zip_path = "/tmp/tetris_ai_model.zip"  # En Linux/Mac
+            # zip_path = "C:\\temp\\tetris_ai_model.zip"  # En Windows
+
+            with zipfile.ZipFile(zip_path, 'w') as zf:
+                # Añadir .h5
+                h5_path = "tetris_dqn_model.h5"
+                if os.path.exists(h5_path):
+                    zf.write(h5_path, "tetris_dqn_model.h5")
+
+                # Añadir carpeta SavedModel si existe
+                saved_model_dir = "tetris_tf_model"
+                if os.path.exists(saved_model_dir):
+                    for root, dirs, files in os.walk(saved_model_dir):
+                        for file in files:
+                            file_path = os.path.join(root, file)
+                            arcname = os.path.relpath(file_path, ".")
+                            zf.write(file_path, arcname)
+
+            # Devolver el ZIP
+            response = FileResponse(
+                open(zip_path, 'rb'),
+                content_type='application/zip'
+            )
+            response['Content-Disposition'] = 'attachment; filename="tetris_ai_model.zip"'
+            return response
+
+        else:
+            # Descargar solo el archivo .h5
+            file_path = "tetris_dqn_model.h5"
+            if not os.path.exists(file_path):
+                return HttpResponse("Modelo no encontrado", status=404)
+
+            response = FileResponse(
+                open(file_path, 'rb'),
+                content_type='application/octet-stream'
+            )
+            response['Content-Disposition'] = 'attachment; filename="tetris_dqn_model.h5"'
+
+            return response
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)    
-    
+
 ##############################################333
 # END TETRIS FUNCIONALITY
 ##############################################333
