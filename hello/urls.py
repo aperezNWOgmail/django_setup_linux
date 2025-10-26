@@ -7,7 +7,8 @@ urlpatterns = [
     path('getAllLogs', views.getAllLogs,    name='getAllLogs'),
     path('getAllPersons', views.getAllPersons, name='getAllPersons'),
     path('getAllContactForms', views.getAllContactForms, name='getAllContactForms'),
-    path('download_tictactoe_model', views.download_tictactoe_model, name='download_tictactoe_model'),
     path('train_tictactoe_model', views.train_tictactoe_model, name='train_tictactoe_model'),
+    path('download_tictactoe_model', views.download_tictactoe_model, name='download_tictactoe_model'),
     path('train_tetris_endpoint', views.train_tetris_endpoint, name='train_tetris_endpoint'),
+    path('download_tetris_model', views.download_tetris_model, name='download_tetris_model'),
 ]
