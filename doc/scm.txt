@@ -36,3 +36,4 @@ https://sxcqd6-8000.csb.app/download_tictactoe_model
 # 10. Zip Model     (alternative #2)
 cd tictactoe_tf_model
 zip -r tictactoe_tf_model.zip tictactoe_tf_model/
+

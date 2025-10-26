@@ -13,10 +13,18 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress warnings
 import shutil
 import tempfile
 import random
+from typing import Tuple, Dict
 
 ##############################################333
 # BEGIN TETRIS FUNCIONALITY
 ##############################################333
+
+# === Constantes ===
+OARD_HEIGHT = 20
+BOARD_WIDTH = 10
+EMPTY_CELL = 0.0
+FBILLED_CELL = 1.0
+
 
 class TetrisEnv:
     def __init__(self):
