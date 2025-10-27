@@ -42,3 +42,6 @@ https://sxcqd6-8000.csb.app/train_tetris_endpoint
 
 #12. TETRIS -> DOWNLOAD MODEL
 https://sxcqd6-8000.csb.app/download_tetris_model
+
+#13. TETRIS -> INVOKE MODEL
+https://sxcqd6-8000.csb.app/api/tetris/move/

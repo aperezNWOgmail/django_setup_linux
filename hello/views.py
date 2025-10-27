@@ -1,21 +1,25 @@
-from django.http import FileResponse, JsonResponse
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.db import connection
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import serializers
-from tensorflow.keras import layers, models
-from typing              import Tuple, Dict
-from tetris_env          import TetrisEnv
-from train_agent_tetris  import train_agent_tetris
-from django.conf         import settings
+from django.http                  import FileResponse, JsonResponse,  HttpResponse
+from django.shortcuts             import render
+from django.db                    import connection
+from django.views                 import View
+from django.utils.decorators      import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.conf                  import settings
+from rest_framework.decorators    import api_view
+from rest_framework.response      import Response
+from rest_framework               import serializers
+from tensorflow.keras             import layers, models
+from typing                       import Tuple, Dict
+from tetris_env                   import TetrisEnv
+from train_agent_tetris           import train_agent_tetris
+import json
 import zipfile
 import shutil
 import tempfile
 import random
 import numpy      as np
 import tensorflow as tf
+import json
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress warnings
 
@@ -69,29 +73,6 @@ def download_tetris_model(request):
 
     try:
 
-        # Create a temporary directory for the zip file
-        #temp_dir = tempfile.mkdtemp()
-        #zip_path = os.path.join(temp_dir, 'tetris_tf_model.zip')
-
-        # Create ZIP archive
-        #shutil.make_archive(
-            # output path (no extension)
-        #    base_name=os.path.join(temp_dir, 'tetris_dqn_model.h5'),
-        #    format='zip',
-        #    root_dir=model_dir  # directory to compress
-        #)
-
-        # Serve the file
-        #response = FileResponse(
-        #    open(zip_path, 'rb'),
-        #    content_type='application/zip'
-        #)
-        #response['Content-Disposition'] = 'attachment; filename="tictactoe_tf_model.zip"'
-        #return response
-
-        #format_type = request.GET.get("format", "h5")
-        #format_type = request.GET.get("format", "h5")
-
         format_type = "zip"
 
         if format_type == "zip":
@@ -122,23 +103,90 @@ def download_tetris_model(request):
             response['Content-Disposition'] = 'attachment; filename="tetris_ai_model.zip"'
             return response
 
-        else:
-            # Descargar solo el archivo .h5
-            file_path = "tetris_dqn_model.h5"
-            if not os.path.exists(file_path):
-                return HttpResponse("Modelo no encontrado", status=404)
-
-            response = FileResponse(
-                open(file_path, 'rb'),
-                content_type='application/octet-stream'
-            )
-            response['Content-Disposition'] = 'attachment; filename="tetris_dqn_model.h5"'
-
-            return response
-
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)    
+ 
+# === Ruta al modelo ===
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "../tetris_dqn_model.h5")
 
+# === Cargar modelo al iniciar (una sola vez) ===
+_model = None
+ 
+# === Ruta al modelo ===
+def load_model():
+    global _model
+    if _model is None:
+        try:
+            _model = tf.keras.models.load_model(MODEL_PATH)
+            print(f"✅ Modelo cargado desde: {MODEL_PATH}")
+        except Exception as e:
+            print(f"❌ Error al cargar el modelo: {e}")
+    return _model
+
+@method_decorator(csrf_exempt, name='dispatch')
+class GetTetrisAIMove(View):
+    """
+    Endpoint: POST /api/tetris/move/
+    Entrada: { "board": [[...], [...], ...] }  # 20x10
+    Salida: { "action": 3, "action_name": "hard_drop", "q_values": [...] }
+    """
+    
+    def post(self, request):
+        try:
+            # 1. Parsear JSON
+            data = json.loads(request.body)
+            board = data.get("board")
+
+            if not board:
+                return JsonResponse(
+                    {"error": "Falta el campo 'board'"},
+                    status=400
+                )
+
+            # 2. Validar forma del tablero
+            board_array = np.array(board, dtype=np.float32)
+            if board_array.shape != (20, 10):
+                return JsonResponse(
+                    {"error": "El tablero debe ser de 20x10"},
+                    status=400
+                )
+
+            # 3. Cargar modelo
+            model = load_model()
+            if model is None:
+                return JsonResponse(
+                    {"error": "Modelo no disponible. Revisa los logs."},
+                    status=500
+                )
+
+            # 4. Hacer predicción
+            input_data = np.expand_dims(board_array, axis=0)  # (1, 20, 10)
+            q_values = model.predict(input_data, verbose=0)[0]
+
+            # 5. Obtener mejor acción
+            action = int(np.argmax(q_values))
+            action_names = ["move_left", "move_right", "rotate", "hard_drop", "no_action"]
+            action_name = action_names[action]
+
+            # 6. Devolver respuesta
+            return JsonResponse({
+                "action": action,
+                "action_name": action_name,
+                "q_values": q_values.tolist(),
+                "success": True
+            })
+
+        except json.JSONDecodeError:
+            return JsonResponse(
+                {"error": "JSON inválido"},
+                status=400
+            )
+        except Exception as e:
+            return JsonResponse(
+                {"error": f"Error interno: {str(e)}"},
+                status=500
+            )
+            
 ##############################################333
 # END TETRIS FUNCIONALITY
 ##############################################333
@@ -261,6 +309,9 @@ def download_tictactoe_model(request):
 ##############################################333
 
 
+##############################################333
+# BEGIN DATABASE END POINTS
+##############################################333
 
 def home(request):
     return HttpResponse("Hello, Django!")
@@ -377,3 +428,7 @@ def getAllContactForms(request):
     except Exception as e:
         return Response({'error': str(e)}, status=500)
 
+
+##############################################333
+# END DATABASE END POINTS
+##############################################333
