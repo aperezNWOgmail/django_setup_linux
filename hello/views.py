@@ -55,6 +55,8 @@ def create_tetris_dqn_model():
         # Guardar en formato .h5
         model.save('tetris_dqn_model.h5')
 
+        print({"Ok": "Model created successfully tetris_dqn_model.h5"})
+
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
@@ -85,7 +87,7 @@ class GetAIMoveViewTetrisDQNAgent(View):
     def post(self, request):
         try:
             # 1. Parsear JSON
-            data = json.loads(request.body)
+            data  = json.loads(request.body)
             board = data.get("board")
 
             if not board:
