@@ -10,8 +10,6 @@ from rest_framework.response import Response
 from rest_framework import serializers
 from tensorflow.keras import layers, models
 from typing import Tuple, Dict
-from tetris_env import TetrisEnv
-from train_agent_tetris import train_agent_tetris
 import json
 import zipfile
 import shutil
@@ -137,7 +135,7 @@ def create_tetris_dqn_model():
 
 # === Ruta al modelo ===
 MODEL_PATH_TETRIS = os.path.join(os.path.dirname(
-    __file__), "../tetris_dqn_model.h5")
+    __file__), "tetris_dqn_model.h5")
 
 # === Cargar modelo al inicio (una sola vez) ===
 _model_tetris_dqn_agent = None
