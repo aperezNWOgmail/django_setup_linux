@@ -1,36 +1,36 @@
-from django.http                  import FileResponse, JsonResponse,  HttpResponse
-from django.shortcuts             import render
-from django.db                    import connection
-from django.views                 import View
-from django.utils.decorators      import method_decorator
+from django.http import FileResponse, JsonResponse,  HttpResponse
+from django.shortcuts import render
+from django.db import connection
+from django.views import View
+from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.conf                  import settings
-from rest_framework.decorators    import api_view
-from rest_framework.response      import Response
-from rest_framework               import serializers
-from tensorflow.keras             import layers, models
-from typing                       import Tuple, Dict
-from tetris_env                   import TetrisEnv
-from train_agent_tetris           import train_agent_tetris
+from django.conf import settings
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import serializers
+from tensorflow.keras import layers, models
+from typing import Tuple, Dict
+from tetris_env import TetrisEnv
+from train_agent_tetris import train_agent_tetris
 import json
 import zipfile
 import shutil
 import tempfile
 import random
-import numpy      as np
+import numpy as np
 import tensorflow as tf
 import json
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress warnings
 
 
-##############################################333
+# 333
 # BEGIN TETRIS FUNCIONALITY
-##############################################333
+# 333
 
 def train_tetris_endpoint(request):
 
-    env   = TetrisEnv()
+    env = TetrisEnv()
 
     # test debug
     state = env.reset()
@@ -40,7 +40,8 @@ def train_tetris_endpoint(request):
     for step in range(20):
         action = 4  # No hacer nada
         next_state, reward, done, info = env.step(action)
-        print(f"Paso {step+1}: Acción={action}, Recompensa={reward:.2f}, Hecho={done}")
+        print(
+            f"Paso {step+1}: Acción={action}, Recompensa={reward:.2f}, Hecho={done}")
         if done:
             print("¡Juego terminado!")
             break
@@ -59,9 +60,9 @@ def train_tetris_endpoint(request):
     model.save(save_dir, save_format="tf")  # ← This was missing!
 
     return JsonResponse({
-            'status': 'success',
-            'message': 'Model trained and saved!',
-            'save_path': save_dir
+        'status': 'success',
+        'message': 'Model trained and saved!',
+        'save_path': save_dir
     })
 
 
@@ -104,15 +105,18 @@ def download_tetris_model(request):
             return response
 
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)    
- 
+        return JsonResponse({"error": str(e)}, status=500)
+
+
 # === Ruta al modelo ===
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "../tetris_dqn_model.h5")
 
 # === Cargar modelo al iniciar (una sola vez) ===
 _model = None
- 
+
 # === Ruta al modelo ===
+
+
 def load_model():
     global _model
     if _model is None:
@@ -123,6 +127,7 @@ def load_model():
             print(f"❌ Error al cargar el modelo: {e}")
     return _model
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class GetTetrisAIMove(View):
     """
@@ -130,7 +135,7 @@ class GetTetrisAIMove(View):
     Entrada: { "board": [[...], [...], ...] }  # 20x10
     Salida: { "action": 3, "action_name": "hard_drop", "q_values": [...] }
     """
-    
+
     def post(self, request):
         try:
             # 1. Parsear JSON
@@ -165,7 +170,8 @@ class GetTetrisAIMove(View):
 
             # 5. Obtener mejor acción
             action = int(np.argmax(q_values))
-            action_names = ["move_left", "move_right", "rotate", "hard_drop", "no_action"]
+            action_names = ["move_left", "move_right",
+                            "rotate", "hard_drop", "no_action"]
             action_name = action_names[action]
 
             # 6. Devolver respuesta
@@ -186,14 +192,108 @@ class GetTetrisAIMove(View):
                 {"error": f"Error interno: {str(e)}"},
                 status=500
             )
-            
-##############################################333
-# END TETRIS FUNCIONALITY
-##############################################333
 
-##############################################333
+
+def create_tetris_dqn_model():
+    """
+    Crea un modelo DQN para Tetris.
+    Entrada: (20, 10) - tablero
+    Salida: (5,) - acciones [izq, der, rotar, bajar, nada]
+    """
+    model = models.Sequential([
+        layers.Input(shape=(20, 10)),
+        layers.Flatten(),
+        layers.Dense(128, activation='relu'),
+        layers.Dropout(0.2),
+        layers.Dense(128, activation='relu'),
+        layers.Dense(5)  # Q-values para 5 acciones
+    ])
+
+    model.compile(optimizer='adam', loss='mse', metrics=['mae'])
+    return model
+
+    # === Crear y guardar el modelo ===
+    model = create_tetris_dqn_model()
+
+    # Guardar en formato .h5
+    model.save('tetris_fixed_dqn_agent.h5')
+
+
+# === Ruta al modelo ===
+MODEL_PATH_TETRIS = os.path.join(
+    settings.BASE_DIR, '', 'tetris_fixed_dqn_agent.h5')
+
+# === Cargar modelo al inicio (una sola vez) ===
+_model_tetris_dqn_agent = None
+
+
+def load_model_tetris_dqn_agent():
+    global _model_tetris_dqn_agent
+    if _model_tetris_dqn_agent is None:
+        try:
+            _model_tetris_dqn_agent = tf.keras.models.load_model(MODEL_PATH)
+            print(f"✅ Modelo cargado desde: {MODEL_PATH}")
+        except Exception as e:
+            print(f"❌ Error al cargar modelo: {e}")
+    return _model_tetris_dqn_agent
+
+
+class GetAIMoveViewTetrisDQNAgent(View):
+    def post(self, request):
+        try:
+            # 1. Parsear JSON
+            data = json.loads(request.body)
+            board = data.get("board")
+
+            if not board:
+                return JsonResponse({"error": "Falta el campo 'board'"}, status=400)
+
+            # 2. Validar forma del tablero
+            board_array = np.array(board, dtype=np.float32)
+            if board_array.shape != (20, 10):
+                return JsonResponse(
+                    {"error": "El tablero debe ser de 20x10"},
+                    status=400
+                )
+
+            # 3. Cargar modelo
+            model = load_model_tetris_dqn_agent()
+            if model is None:
+                return JsonResponse(
+                    {"error": "No se pudo cargar el modelo. Revisa los logs."},
+                    status=500
+                )
+
+            # 4. Hacer predicción
+            input_data = np.expand_dims(board_array, axis=0)  # (1, 20, 10)
+            q_values = model.predict(input_data, verbose=0)[0]
+            action = int(np.argmax(q_values))
+
+            # Nombres de acciones
+            action_names = ["move_left", "move_right",
+                            "rotate", "hard_drop", "no_action"]
+
+            # 5. Responder
+            return JsonResponse({
+                "action": action,
+                "action_name": action_names[action],
+                "q_values": q_values.tolist(),
+                "success": True
+            })
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "JSON inválido"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": f"Error interno: {str(e)}"}, status=500)
+
+# ###########################################
+# END TETRIS FUNCIONALITY
+# ###########################################
+
+# ###########################################
 # BEGIN TIC TAC TOE FUNCIONALITY
-##############################################333
+# ###########################################
+
 
 def generate_game():
     board = np.zeros(9, dtype=int)
@@ -304,14 +404,14 @@ def download_tictactoe_model(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-##############################################333
+# ######################################
 # END  TIC TAC TOE FUNCIONALITY
-##############################################333
+# ######################################
 
 
-##############################################333
+# #######################################
 # BEGIN DATABASE END POINTS
-##############################################333
+# #######################################
 
 def home(request):
     return HttpResponse("Hello, Django!")
@@ -328,6 +428,8 @@ def my_view(request):
     return render(request, 'my_template.html', context)
 
 # Define a serializer to handle the raw data.
+
+
 class RawDataSerializer(serializers.Serializer):
     def to_representation(self, instance):
         # Convert row tuple to dictionary
@@ -429,6 +531,6 @@ def getAllContactForms(request):
         return Response({'error': str(e)}, status=500)
 
 
-##############################################333
+# ##########################
 # END DATABASE END POINTS
-##############################################333
+# ##########################
