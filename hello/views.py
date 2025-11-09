@@ -94,6 +94,7 @@ class GetAIMoveViewTetrisDQNAgent(View):
             # 2. Validar forma del tablero
             board_array = np.array(board, dtype=np.float32)
             if board_array.shape != (20, 10):
+                print({"error": "El tablero debe ser de 20x10"})
                 return JsonResponse(
                     {"error": "El tablero debe ser de 20x10"},
                     status=400
@@ -102,6 +103,7 @@ class GetAIMoveViewTetrisDQNAgent(View):
             # 3. Cargar modelo
             model = load_model_tetris_dqn_agent()
             if model is None:
+                print({"error": "No se pudo cargar el modelo. Revisa los logs"})
                 return JsonResponse(
                     {"error": "No se pudo cargar el modelo. Revisa los logs."},
                     status=500
