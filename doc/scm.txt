@@ -37,11 +37,4 @@ https://nkg7t7-8000.csb.app/download_tictactoe_model
 cd tictactoe_tf_model
 zip -r tictactoe_tf_model.zip tictactoe_tf_model/
 
-#11. TETRIS -> TRAIN MODEL
-https://nkg7t7-8000.csb.app/train_tetris_endpoint
 
-#12. TETRIS -> DOWNLOAD MODEL
-https://nkg7t7-8000.csb.app/download_tetris_model
-
-#13. TETRIS -> INVOKE MODEL
-https://nkg7t7-8000.csb.app/api/tetris/move/
