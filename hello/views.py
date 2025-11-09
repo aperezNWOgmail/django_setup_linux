@@ -26,68 +26,54 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress warnings
 # BEGIN TETRIS FUNCIONALITY
 # 333
 
-
-#############################################
-
 def create_tetris_dqn_model():
     """
     Crea un modelo DQN para Tetris.
     Entrada: (20, 10) - tablero
     Salida: (5,) - acciones [izq, der, rotar, bajar, nada]
     """
-    try:
-
-        model = models.Sequential([
-            layers.Input(shape=(20, 10)),
-            layers.Flatten(),
-            layers.Dense(128, activation='relu'),
-            layers.Dropout(0.2),
-            layers.Dense(128, activation='relu'),
-            layers.Dense(5)  # Q-values para 5 acciones
-        ])
-
-        model.compile(optimizer='adam', loss='mse', metrics=['mae'])
-        return model
-
-        # === Crear y guardar el modelo ===
-        model = create_tetris_dqn_model()
-
-        # Guardar en formato .h5
-        model.save('tetris_dqn_model.h5')
-
-        print({"Ok": "Model created successfully tetris_dqn_model.h5"})
-
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+    model = models.Sequential([
+        layers.Input(shape=(20, 10)),
+        layers.Flatten(),
+        layers.Dense(128, activation='relu'),
+        layers.Dropout(0.2),
+        layers.Dense(128, activation='relu'),
+        layers.Dense(5)  # Q-values para 5 acciones
+    ])
+    
+    model.compile(optimizer='adam', loss='mse', metrics=['mae'])
+    return model
 
 
+
+
+#############################################
 # === Ruta al modelo ===
-MODEL_PATH_TETRIS = os.path.join(os.path.dirname(
-    __file__), "tetris_dqn_model.h5")
+MODEL_PATH = os.path.join(settings.BASE_DIR, '', 'tetris_dqn_agent.h5')
 
 # === Cargar modelo al inicio (una sola vez) ===
-_model_tetris_dqn_agent = None
+_model = None
 
-
-def load_model_tetris_dqn_agent():
-    global _model_tetris_dqn_agent
-    if _model_tetris_dqn_agent is None:
+def load_model():
+    global _model
+    if _model is None:
         try:
-            _model_tetris_dqn_agent = tf.keras.models.load_model(
-                MODEL_PATH_TETRIS)
-            print(f"✅ Modelo cargado desde: {MODEL_PATH_TETRIS}")
+            # === Crear y guardar el modelo ===
+            _model = create_tetris_dqn_model()# Guardar en formato .h5
+            _model.save(MODEL_PATH)
+            _model = tf.keras.models.load_model(MODEL_PATH)
+            print(f"✅ Modelo cargado desde: {MODEL_PATH}")
         except Exception as e:
             print(f"❌ Error al cargar modelo: {e}")
+    return _model
 
-    return _model_tetris_dqn_agent
-
-
+# === Vista: POST /api/tetris/move/ ===
 @method_decorator(csrf_exempt, name='dispatch')
-class GetAIMoveViewTetrisDQNAgent(View):
+class GetAIMoveView(View):
     def post(self, request):
         try:
             # 1. Parsear JSON
-            data  = json.loads(request.body)
+            data = json.loads(request.body)
             board = data.get("board")
 
             if not board:
@@ -96,16 +82,14 @@ class GetAIMoveViewTetrisDQNAgent(View):
             # 2. Validar forma del tablero
             board_array = np.array(board, dtype=np.float32)
             if board_array.shape != (20, 10):
-                print({"error": "El tablero debe ser de 20x10"})
                 return JsonResponse(
                     {"error": "El tablero debe ser de 20x10"},
                     status=400
                 )
 
             # 3. Cargar modelo
-            model = load_model_tetris_dqn_agent()
+            model = load_model()
             if model is None:
-                print({"error": "No se pudo cargar el modelo. Revisa los logs"})
                 return JsonResponse(
                     {"error": "No se pudo cargar el modelo. Revisa los logs."},
                     status=500
@@ -117,8 +101,7 @@ class GetAIMoveViewTetrisDQNAgent(View):
             action = int(np.argmax(q_values))
 
             # Nombres de acciones
-            action_names = ["move_left", "move_right",
-                            "rotate", "hard_drop", "no_action"]
+            action_names = ["move_left", "move_right", "rotate", "hard_drop", "no_action"]
 
             # 5. Responder
             return JsonResponse({

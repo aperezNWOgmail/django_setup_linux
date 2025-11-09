@@ -1,6 +1,6 @@
 from django.urls import path
-from hello import views
-from .views import GetAIMoveViewTetrisDQNAgent
+from hello       import views
+from .views      import GetAIMoveView
 
 urlpatterns = [
     path("", views.home, name="home"),
@@ -13,5 +13,5 @@ urlpatterns = [
     path('download_tictactoe_model', views.download_tictactoe_model,
          name='download_tictactoe_model'),
     path('tetris_ai_move',
-         GetAIMoveViewTetrisDQNAgent.as_view(), name='tetris_ai_move'),
+         GetAIMoveView.as_view(), name='tetris_ai_move'),
 ]
