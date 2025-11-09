@@ -12,12 +12,6 @@ urlpatterns = [
          name='train_tictactoe_model'),
     path('download_tictactoe_model', views.download_tictactoe_model,
          name='download_tictactoe_model'),
-    path('train_tetris_endpoint', views.train_tetris_endpoint,
-         name='train_tetris_endpoint'),
-    path('download_tetris_model', views.download_tetris_model,
-         name='download_tetris_model'),
-    path('download_tetris_model', views.download_tetris_model,
-         name='download_tetris_model'),
-    path('api/tetris/movefixed/',
+    path('tetris_ai_move',
          GetAIMoveViewTetrisDQNAgent.as_view(), name='tetris_ai_move'),
 ]

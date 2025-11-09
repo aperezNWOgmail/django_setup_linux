@@ -26,87 +26,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress warnings
 # BEGIN TETRIS FUNCIONALITY
 # 333
 
-def train_tetris_endpoint(request):
-
-    env = TetrisEnv()
-
-    # test debug
-    state = env.reset()
-    print("Estado inicial:")
-    env.render()
-
-    for step in range(20):
-        action = 4  # No hacer nada
-        next_state, reward, done, info = env.step(action)
-        print(
-            f"Paso {step+1}: Acción={action}, Recompensa={reward:.2f}, Hecho={done}")
-        if done:
-            print("¡Juego terminado!")
-            break
-
-    # train agent
-    train_agent_tetris(env, epochs=500)
-
-    # Cargar modelo entrenado
-    model = tf.keras.models.load_model("tetris_dqn_model.h5")
-
-    # ✅ Save model in SavedModel format (for C++ compatibility)
-    save_dir = "tetris_tf_model"
-    if os.path.exists(save_dir):
-        shutil.rmtree(save_dir)  # Remove old model
-
-    model.save(save_dir, save_format="tf")  # ← This was missing!
-
-    return JsonResponse({
-        'status': 'success',
-        'message': 'Model trained and saved!',
-        'save_path': save_dir
-    })
-
-
-@api_view(['GET'])
-def download_tetris_model(request):
-    model_dir = "tetris_tf_model"
-    if not os.path.exists(model_dir):
-        return JsonResponse({"error": "Model not trained yet."}, status=404)
-
-    try:
-
-        format_type = "zip"
-
-        if format_type == "zip":
-            # Crear un archivo ZIP con ambos
-            zip_path = "/tmp/tetris_ai_model.zip"  # En Linux/Mac
-            # zip_path = "C:\\temp\\tetris_ai_model.zip"  # En Windows
-
-            with zipfile.ZipFile(zip_path, 'w') as zf:
-                # Añadir .h5
-                h5_path = "tetris_dqn_model.h5"
-                if os.path.exists(h5_path):
-                    zf.write(h5_path, "tetris_dqn_model.h5")
-
-                # Añadir carpeta SavedModel si existe
-                saved_model_dir = "tetris_tf_model"
-                if os.path.exists(saved_model_dir):
-                    for root, dirs, files in os.walk(saved_model_dir):
-                        for file in files:
-                            file_path = os.path.join(root, file)
-                            arcname = os.path.relpath(file_path, ".")
-                            zf.write(file_path, arcname)
-
-            # Devolver el ZIP
-            response = FileResponse(
-                open(zip_path, 'rb'),
-                content_type='application/zip'
-            )
-            response['Content-Disposition'] = 'attachment; filename="tetris_ai_model.zip"'
-            return response
-
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
 
 #############################################
-
 
 def create_tetris_dqn_model():
     """
@@ -114,23 +35,28 @@ def create_tetris_dqn_model():
     Entrada: (20, 10) - tablero
     Salida: (5,) - acciones [izq, der, rotar, bajar, nada]
     """
-    model = models.Sequential([
-        layers.Input(shape=(20, 10)),
-        layers.Flatten(),
-        layers.Dense(128, activation='relu'),
-        layers.Dropout(0.2),
-        layers.Dense(128, activation='relu'),
-        layers.Dense(5)  # Q-values para 5 acciones
-    ])
+    try:
 
-    model.compile(optimizer='adam', loss='mse', metrics=['mae'])
-    return model
+        model = models.Sequential([
+            layers.Input(shape=(20, 10)),
+            layers.Flatten(),
+            layers.Dense(128, activation='relu'),
+            layers.Dropout(0.2),
+            layers.Dense(128, activation='relu'),
+            layers.Dense(5)  # Q-values para 5 acciones
+        ])
 
-    # === Crear y guardar el modelo ===
-    model = create_tetris_dqn_model()
+        model.compile(optimizer='adam', loss='mse', metrics=['mae'])
+        return model
 
-    # Guardar en formato .h5
-    model.save('tetris_dqn_model.h5')
+        # === Crear y guardar el modelo ===
+        model = create_tetris_dqn_model()
+
+        # Guardar en formato .h5
+        model.save('tetris_dqn_model.h5')
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 # === Ruta al modelo ===
@@ -150,6 +76,7 @@ def load_model_tetris_dqn_agent():
             print(f"✅ Modelo cargado desde: {MODEL_PATH_TETRIS}")
         except Exception as e:
             print(f"❌ Error al cargar modelo: {e}")
+
     return _model_tetris_dqn_agent
 
 
