@@ -54,6 +54,11 @@ python decode_model.py
 # 13. TETRIS - DOWNOAD MODEL
 curl -L -o tetris_dqn_agent.h5 \
   https://storage.googleapis.com/tetris-ai-public-models/tetris_dqn_full_board_20x10_v1.h5
+
+mkdir -p tetris_app/static/models
+curl -L -o tetris_app/static/models/tetris_dqn_agent.h5 \
+     https://storage.googleapis.com/tetris-ai-public-models/tetris_dqn_full_board_20x10_v1.h5
+     
   
 # 14. TETRIS - TEST BACKEND
 curl -X POST https://6rtfk8-8000.csb.app/tetris_ai_move \
