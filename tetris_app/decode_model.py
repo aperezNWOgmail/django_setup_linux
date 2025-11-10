@@ -2,7 +2,7 @@
 import base64
 
 print("🔍 Reading base64 data...")
-with open('tetris_dqn_agent.b64', 'r') as f:
+with open('static/models/tetris_dqn_agent.b64', 'r') as f:
     b64_data = f.read().replace('\n', '').strip()
 
 print("🔄 Decoding and saving as .h5...")
