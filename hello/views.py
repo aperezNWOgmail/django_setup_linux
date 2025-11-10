@@ -26,11 +26,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress warnings
 # BEGIN TETRIS FUNCIONALITY
 #############################################
 
-# Load model once at startup
-MODEL_PATH = 'tetris_app/static/models/tetris_dqn_agent.h5'
-model = tf.keras.models.load_model(MODEL_PATH)
-print("✅ Model loaded successfully.")
-
 # ###########################################
 # END TETRIS FUNCIONALITY
 # ###########################################
