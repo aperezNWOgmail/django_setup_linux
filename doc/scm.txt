@@ -27,44 +27,13 @@ pip install -r requirements.txt
 python manage.py runserver
 
 # 8. TIC TAC TOE -> Train Model
-https://nkg7t7-8000.csb.app/train_tictactoe_model
+https://6rtfk8-8000.csb.app/train_tictactoe_model
 {"status": "success", "message": "Model trained and saved!", "epochs": 10, "dataset_size": 22882, "save_path": "models/tictactoe_tf_model"}
 
 # 9. TIC TAC TOE -> Download Model (alternative #1)
-https://nkg7t7-8000.csb.app/download_tictactoe_model
+https://6rtfk8-8000.csb.app/download_tictactoe_model
 
 # 10. TIC TAC TOE -> Zip Model     (alternative #2)
 cd tictactoe_tf_model
 zip -r tictactoe_tf_model.zip tictactoe_tf_model/
-
-# 11. TETRIS - TRAIN MODEL (alternativa #1)
-pip install tensorflow numpy
-python train_agent.py
-
-Después de ~1000–5000 episodios:
-
-El agente empezará a limpiar líneas → Score > 0
-Las recompensas serán positivas
-El modelo tomará decisiones útiles (bajar, rotar, evitar llenar)
-
-# 12. TETRIS - GET A READY TRAINED MODEL (alternativa #2)
-upload : tetris_dqn_agent.b64
-python decode_model.py
-
-# 13. TETRIS - DOWNOAD MODEL
-mkdir -p tetris_app/static/models
-curl -L -o tetris_app/static/models/tetris_dqn_agent.h5 \
-     https://storage.googleapis.com/tetris-ai-public-models/tetris_dqn_full_board_20x10_v1.h5
-
-curl -L -o tetris_app/static/models/tetris_dqn_agent.h5 \
-     https://storage.googleapis.com/tetris-ai-public-models/tetris_dqn_features_v1.h5 
-     
-
-# 14. TETRIS - TEST BACKEND
-curl -X POST https://6rtfk8-8000.csb.app/tetris_ai_move \
-     -H "Content-Type: application/json" \
-     -d '{"board": [[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]]}'
-
-{"action": 0, "action_name": "move_left", "q_values": [0.0, 0.0, 0.0, 0.0, 0.0], "success": true}         
-
 
