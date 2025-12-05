@@ -1,3 +1,5 @@
+from linear_regression_app.model_predictor import predict_time
+import logging
 from django.http import FileResponse, JsonResponse,  HttpResponse
 from django.shortcuts import render
 from django.db import connection
@@ -8,6 +10,7 @@ from django.conf import settings
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import serializers
+from rest_framework import status
 from tensorflow.keras import layers, models
 from typing import Tuple, Dict
 import json
@@ -20,6 +23,7 @@ import tensorflow as tf
 import json
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress warnings
+logger = logging.getLogger(__name__)
 
 
 #############################################
@@ -261,3 +265,60 @@ def getAllContactForms(request):
 # ##########################
 # END DATABASE END POINTS
 # ##########################
+
+@api_view(['POST'])
+def predict_apollo_time(request):
+    """
+    API endpoint to predict the total mission time for an Apollo mission.
+    Expects a JSON body with 'mission_number'.
+    """
+    try:
+        # Get the mission number from the request data
+        mission_number = request.data.get('mission_number')
+
+        if mission_number is None:
+            return Response(
+                {'error': 'Missing mission_number in request body'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validate input type
+        try:
+            mission_number = float(mission_number)
+        except (ValueError, TypeError):
+            return Response(
+                {'error': 'mission_number must be a number'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Call the prediction function
+        predicted_time = predict_time(mission_number)
+
+        # Prepare the response data
+        response_data = {
+            'input_mission_number': mission_number,
+            'predicted_total_time_hours': predicted_time,
+            'predicted_duration_days': predicted_time / 24.0
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        # Log the full error
+        logger.exception("Error in predict_apollo_time endpoint")
+        return Response(
+            {'error': f'An internal error occurred: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+# Optional: Health check endpoint
+
+
+def is_valid_number(n):
+    """Check if a number is valid for JSON serialization."""
+    return isinstance(n, (int, float)) and not (math.isnan(n) or math.isinf(n))
+
+
+@api_view(['GET'])
+def health_check(request):
+    return Response({'status': 'ok'})

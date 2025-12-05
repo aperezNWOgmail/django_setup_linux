@@ -37,3 +37,8 @@ https://6rtfk8-8000.csb.app/download_tictactoe_model
 cd tictactoe_tf_model
 zip -r tictactoe_tf_model.zip tictactoe_tf_model/
 
+
+# 11. LINEAR REGRESSION
+curl -X POST https://6rtfk8-8000.csb.app/predict/ \
+     -H "Content-Type: application/json" \
+     -d '{"mission_number": 18.0}'

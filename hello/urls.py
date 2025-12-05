@@ -10,4 +10,6 @@ urlpatterns = [
          name='train_tictactoe_model'),
     path('download_tictactoe_model', views.download_tictactoe_model,
          name='download_tictactoe_model'),
+    path('predict/', views.predict_apollo_time, name='predict_apollo_time'),
+    path('health/',  views.health_check, name='health_check'),  # Optional
 ]
