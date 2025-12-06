@@ -1,5 +1,3 @@
-from linear_regression_app.model_predictor import predict_time
-import logging
 from django.http import FileResponse, JsonResponse,  HttpResponse
 from django.shortcuts import render
 from django.db import connection
@@ -23,6 +21,11 @@ import tensorflow as tf
 import json
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress warnings
+
+from machine_learning_app.model_predictor import predict_time
+import logging
+import math # Import math module to check for special values
+
 logger = logging.getLogger(__name__)
 
 
@@ -265,6 +268,10 @@ def getAllContactForms(request):
 # ##########################
 # END DATABASE END POINTS
 # ##########################
+def is_valid_number(n):
+    """Check if a number is valid for JSON serialization."""
+    return isinstance(n, (int, float)) and not (math.isnan(n) or math.isinf(n))
+
 
 @api_view(['POST'])
 def predict_apollo_time(request):
@@ -294,12 +301,33 @@ def predict_apollo_time(request):
         # Call the prediction function
         predicted_time = predict_time(mission_number)
 
+        # --- Check for invalid float values before serialization ---
+        if not is_valid_number(predicted_time):
+            logger.error(
+                f"Prediction returned invalid value: {predicted_time} for mission {mission_number}")
+            return Response(
+                {'error': f'Prediction calculation resulted in an invalid value: {predicted_time}. Check model training.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
         # Prepare the response data
         response_data = {
             'input_mission_number': mission_number,
             'predicted_total_time_hours': predicted_time,
             'predicted_duration_days': predicted_time / 24.0
         }
+
+        # Also check the derived value
+        duration_days = predicted_time / 24.0
+        if not is_valid_number(duration_days):
+            logger.error(
+                f"Calculated duration returned invalid value: {duration_days} for mission {mission_number}, predicted_time {predicted_time}")
+            return Response(
+                {'error': f'Calculated duration resulted in an invalid value: {duration_days}. Check model training or calculation.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        response_data['predicted_duration_days'] = duration_days
 
         return Response(response_data, status=status.HTTP_200_OK)
 
@@ -312,11 +340,6 @@ def predict_apollo_time(request):
         )
 
 # Optional: Health check endpoint
-
-
-def is_valid_number(n):
-    """Check if a number is valid for JSON serialization."""
-    return isinstance(n, (int, float)) and not (math.isnan(n) or math.isinf(n))
 
 
 @api_view(['GET'])
