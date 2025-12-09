@@ -62,12 +62,13 @@ def load_model():
     return _model
 
 def predict_time(mission_number):
-    model = load_model()
+    #
+    model       = load_model()
     # Ensure input is in the correct shape for prediction
     input_array = np.array([[mission_number]], dtype=np.float32)
-    prediction = model.predict(input_array, verbose=0)
+    prediction  = model.predict(input_array, verbose=0)
     # Extract the scalar value from the prediction array
-    result = float(prediction[0][0])
+    result      = float(prediction[0][0])
 
     # Check for NaN/Inf in the prediction result before returning
     if np.isnan(result) or np.isinf(result):
