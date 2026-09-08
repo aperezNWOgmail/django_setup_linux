@@ -1,18 +1,15 @@
-
 -----------------------------------------
--- main setup (not windows compatible)
+-- main setup (codespaces - ubuntu)
 -----------------------------------------
 
 # 1. Create and activate virtual environment
-sudo apt install python3.12-venv
-rm -rf .venv
+sudo apt-get update
+sudo apt-get install -y python3.12-venv
 python3.12 -m venv .venv
-source .venv/bin/activate
 
-# 6. Optional shorcut for both 4. and 5. 
-pip freeze > requirements.txt
-# conflicting versions delete version number
-pip install -r requirements.txt
+# 3. Activate the new environment
+source .venv/bin/activate
+pip install --upgrade pip setuptools wheel
 
 # 2. Descargar e instalar la clave y el repositorio de Microsoft para Ubuntu/Debian
 curl https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.4.d/microsoft.asc
@@ -27,7 +24,6 @@ sudo apt-get update
 # Te pedirá aceptar los términos de licencia en la terminal (puedes usar las flechas y Enter)
 sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev
 
-
 # 4. Install Python packages
 pip install django djangorestframework pyodbc mssql-django django-cors-headers
 
@@ -38,7 +34,11 @@ pip install tensorflow
 pip install whitenoise
 python manage.py collectstatic
 
-# 7. Run server 
+# 7. Optional shorcut for both 4. and 5. 
+pip freeze > requirements.txt
+# conflicting versions delete version number
+
+# 8. Run server 
 python manage.py runserver
 
 # 8. TIC TAC TOE -> Train Model
