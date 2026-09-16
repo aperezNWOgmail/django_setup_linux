@@ -46,7 +46,8 @@ ALLOWED_HOSTS = [
                     , 'https://apereznwo.github.io/'
                     , 'django-setup-linux.onrender.com'
                     , 'django-setup-linux-latest.onrender.com'
-                    , 'django-setup-linux-latest-aqt9.onrender.com'
+                    , 'django-setup-linux-latest-aqt9.onrender.com',
+                    , 'django-setup-linux-latest-o4i3.onrender.com',
                 ]
 
 # Application definition
