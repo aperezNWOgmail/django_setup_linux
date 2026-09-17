@@ -109,54 +109,69 @@ df -h . && du -h --max-depth=1 | sort -hr
 # dot included !!!!
 # (time consumming)
 
-1) docker buildx build -t django_setup_linux .
+     docker buildx build -t django_setup_linux .
 
 # create a tag previous to publish
-3) docker tag django_setup_linux:latest apereznwogmail/django_setup_linux:latest
-
+     docker tag django_setup_linux:latest apereznwogmail/django_setup_linux:latest
 
 # list images built
-2) docker image ls 
+     docker image ls 
 
-# log into docker for publish
-# get PAT from https://app.docker.com/accounts/apereznwogmail/settings/personal-access-tokens
-## privileges : read/write/delete
-## must return 'Login Succeeded'
-4) echo "YOUR_PAT_HERE" | docker login --username apereznwogmail --password-stdin
+## log into docker for publish
+     ## get PAT from https://app.docker.com/accounts/apereznwogmail/settings/personal-access-tokens
+     ## privileges : read/write/delete
+     ## must return 'Login Succeeded'
+          echo "YOUR_PAT_HERE" | docker login --username apereznwogmail --password-stdin
 
-# publish in docker hub
-# publish is time consuming
-# https://hub.docker.com/
-5) docker push apereznwogmail/django_setup_linux:latest
-
-# publis on render
-# URL FOR RENDER : https://dashboard.render.com/
-
-# 6) docker.io/apereznwogmail/django_setup_linux:latest
-6) publish as a docker runtime, not as a docker image.
+## publish in docker hub
+     ## publish is time consuming
+     ## https://hub.docker.com/
+          docker push apereznwogmail/django_setup_linux:latest
 
 --------------------------
 --------------------------
--- PUBLISH CHANGES
+-- REMOTE SETUP
+--------------------------
+--------------------------
+## PUBLISH ON RENDER
+     ##  URL FOR RENDER : https://dashboard.render.com/
+     ##  publish as a docker runtime, not as a docker image.
+         docker.io/apereznwogmail/django_setup_linux:latest
+
+## REMOTE TESTING
+     https://django-setup-linux-latest-o4i3.onrender.com/getPythonWebServerVersion
+
+## CRONJOBS - https://console.cron-job.org/jobs
+    https://django-setup-linux-latest-o4i3.onrender.com/ping
+
+--------------------------
+--------------------------
+-- PUBLISH  GIT CHANGES
 --------------------------
 --------------------------
 
-## 0. save changes on git.
-git add * && git commit -m"fractal changes" && git push && git pull 
+## PATH 1 - NO EXTERNAL AUTH REQUIRED
+     git remote add origin https://github.com/aperezNWO/django_setup_windows.git
+     git add *
+     git push -u origin main
 
-## 1. docker build -t my-spring-boot-app .
-docker buildx build -t django_setup_linux .
+## PATH 2 - EXTERNAL AUTH REQUIRED
+    ##  Create a new PAT with correct scope
+    Go to https://github.com/settings/tokens/new (make sure you're logged in as aperezNWO)
+    Fill in:
 
-## 2. docker tag my-spring-boot-app yourusername/your-repo:latest
-docker tag django_setup_linux:latest apereznwogmail/django_setup_linux:latest
+    Note: codespaces-write
+    Expiration: 90 days
+    Scopes: 
+            ✅ repo (the top-level checkbox — this gives full repo access
+            ✅ workflow
 
-## 3. log into docker for publish
-## get/create PAT from https://app.docker.com/accounts/apereznwogmail/settings/personal-access-tokens
-## create with read/write scope
-echo "YOUR_PAT_HERE" | docker login --username apereznwogmail --password-stdin
+     ##  save changes on git.
 
-## 4. docker push yourusername/your-repo:latest
-docker push apereznwogmail/django_setup_linux:latest 
+     git add * 
+     git commit -m"getPythonWebServerVersion"
+     git remote set-url origin https://aperezNWOGmail:<YOUR_PAT_HERE>@github.com/aperezNWOGmailerezNWO/django_setup_windows.git
+     git push --set-upstream origin main
 
 --------------------------
 --------------------------

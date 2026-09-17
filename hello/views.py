@@ -12,6 +12,7 @@ from rest_framework import serializers
 from rest_framework import status
 from tensorflow.keras import layers, models
 from typing import Tuple, Dict
+import django
 import sys
 import json
 import zipfile
@@ -43,6 +44,10 @@ def health_check(request):
 
 def getPythonVersion(request):
     current_version = sys.version
+    return HttpResponse(f"{current_version}")
+
+def getPythonWebServerVersion(request):
+    current_version = django.get_version()
     return HttpResponse(f"{current_version}")
 
 @api_view(['GET'])
